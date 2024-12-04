@@ -1,0 +1,1420 @@
+---
+title: "Tips to Level-Up Your Shiny for Python Applications"
+subtitle: "PyData Global 2025"
+author: Daniel Chen
+
+format:
+  revealjs:
+    footer: "PyData Global 2025. Slides: https://github.com/chendaniely/pydata-global-2024-pyshiny_tips"
+    slide-number: true
+    show-slide-number: all
+    smaller: true
+
+filters:
+  - shinylive
+  - quarto
+  - line-highlight
+
+editor:
+  render-on-save: true
+---
+
+# Hello!
+
+## Daniel Chen
+
+:::: {.columns}
+
+::: {.column width="35%"}
+![](img/me.jpg)
+:::
+
+::: {.column width="65%"}
+- Lecturer, University of British Columbia
+  - Master's in Data Science Program (MDS)
+- Data Science Educator, Developer Relations, Posit, PBC
+:::
+
+::::
+
+# Shiny for Python
+
+## What is Shiny?
+
+:::: {.columns}
+
+::: {.column width="35%"}
+![](img/logo-shiny.png)
+:::
+
+::: {.column width="65%"}
+- Interactive Web Framework
+  - Dashboards and data-driven applications
+- Automatically handles input/output changes (reactivity)
+
+- Website: <https://shiny.posit.co/py/>
+- Try it live: <https://shinylive.io/py/>
+:::
+
+::::
+
+## Previous PyData Shiny Talks {.smaller}
+
+- [Gordon Shotwell & Tracy Teal - Build Simple and Scalable Apps with Shiny | PyData NYC 2023](https://www.youtube.com/watch?v=9RC8PobU5oQ)
+  - Slides: <https://github.com/gshotwell/shiny-algorithm>
+
+- [Joe Cheng - Shiny: Data-centric web applications in Python | PyData Seattle 2023](https://www.youtube.com/watch?v=0ovCLxttJGE)
+  - Demos: <https://github.com/jcheng5/PyDataSeattle2023-demos>
+
+## What makes shiny special?
+
+- Reactivity!
+
+### What does that mean?
+
+- Outputs automatically update whenever their inputs change
+  - Without requiring explicit event handling or manual refreshes
+  - No writing callbacks
+- Interactive, intuitive, and easy to build
+
+
+## Initial state
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account] --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+  linkStyle 0,1,2,3,4,5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+## Generate Model Scores
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account] --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores)):::changed
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+  linkStyle 0,1,2,3,4,5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+## Get filtered Reactive Calc
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account] --> F
+  Sa --> F{{Filtered}}:::changed
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+  linkStyle 0,1,2,3,5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+## Get Account input
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account]:::changed --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+  linkStyle 0,1,3,5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+## Get Sample Reactive Calc
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}:::changed
+  S[Sample Size] --> Sa
+  A[Account] --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+  linkStyle 0,1,5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+
+## Get Other inputs
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates]:::changed  --> Sa{{Sample}}
+  S[Sample Size]:::changed  --> Sa
+  A[Account] --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+  linkStyle 5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+## Plot API Responses
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account] --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse)):::changed
+
+  classDef changed fill:#f96
+  linkStyle 5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+## Get Filter reactive calc
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account] --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+
+## Account changes
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account]:::changed  --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+## Invalidate Filtered
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account]  --> F
+  Sa --> F{{Filtered}}:::changed
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+  linkStyle 2,3 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+
+## Invalidate Plots
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account]  --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores)):::changed
+  F --> P1((API\nResponse)):::changed
+
+  classDef changed fill:#f96
+  linkStyle 2,3,4,5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+## Calculate model scores
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account]  --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores)):::changed
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+  linkStyle 2,3,4,5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+
+## Get filtered calc
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account]  --> F
+  Sa --> F{{Filtered}}:::changed
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+  linkStyle 2,3,5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+
+## Get Account and Sample
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account]:::changed  --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+  linkStyle 5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+## Calculate API Response
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account]  --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse)):::changed
+
+  classDef changed fill:#f96
+  linkStyle 5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+
+
+## Get Filtered Calc
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account]  --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+
+
+## Sample size changes
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size]:::changed --> Sa
+  A[Account]  --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+
+## Invalidate Sample
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}:::changed
+  S[Sample Size] --> Sa
+  A[Account]  --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+  linkStyle 0,1 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+
+## Invalidate Filter
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account]  --> F
+  Sa --> F{{Filtered}}:::changed
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+  linkStyle 0,1,2,3 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+## Invalidate plots
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account]  --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores)):::changed
+  F --> P1((API\nResponse)):::changed
+
+  classDef changed fill:#f96
+  linkStyle 0,1,2,3,4,5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+## Initial state
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account] --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+  linkStyle 0,1,2,3,4,5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+
+## Generate Model Scores
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account] --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores)):::changed
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+  linkStyle 0,1,2,3,4,5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+
+## Get filtered Reactive Calc
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account] --> F
+  Sa --> F{{Filtered}}:::changed
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+  linkStyle 0,1,2,3,5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+## Get Account input
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account]:::changed --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+  linkStyle 0,1,3,5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+
+## Get Sample Reactive Calc
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}:::changed
+  S[Sample Size] --> Sa
+  A[Account] --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+  linkStyle 0,1,5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+
+## Get Other inputs
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates]:::changed  --> Sa{{Sample}}
+  S[Sample Size]:::changed  --> Sa
+  A[Account] --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+  linkStyle 5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+
+
+## Plot API Responses
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account] --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse)):::changed
+
+  classDef changed fill:#f96
+  linkStyle 5 display:none
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+## Get Filter reactive calc
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 4
+flowchart TD
+  D[Dates] --> Sa{{Sample}}
+  S[Sample Size] --> Sa
+  A[Account] --> F
+  Sa --> F{{Filtered}}
+  F --> P2((Model\nScores))
+  F --> P1((API\nResponse))
+
+  classDef changed fill:#f96
+```
+:::
+
+::: {.column width="50%"}
+- Rectangle: Reactive input
+- Hexagon: Reactive expression
+- Circle: Reactive output
+:::
+
+::::
+
+
+# Background
+
+## Base Application
+
+- Try selecting Lunch > Thursday
+
+```{shinylive-python}
+#| standalone: true
+#| components: [editor, viewer]
+#| viewerHeight: 450
+import pandas as pd
+from shiny import App, render, reactive, ui
+
+app_ui = ui.page_fixed(
+    ui.output_ui("table_day_filter"),
+    ui.output_ui("table_time_filter"),
+    ui.output_data_frame("render_df"),
+)
+
+def server(input, output, session):
+
+    # filtered dataframe from filters
+    @reactive.calc
+    def data_filtered():
+        df = df_tips()
+
+        if input.filter_day(): #<<
+            df = df.loc[df["day"].isin(input.filter_day())] #<<
+
+        if input.filter_time(): #<<
+            df = df.loc[df["time"].isin(input.filter_time())] #<<
+
+        return df
+
+    # dataframe to view in app
+    @render.data_frame
+    def render_df():
+        return render.DataGrid(data_filtered())
+
+    # table day filter
+    @render.ui
+    def table_day_filter():
+        return ui.input_selectize(
+            "filter_day",
+            "table day filter:",
+            df_tips()["day"].unique().tolist(),
+            multiple=True,
+            remove_button=True,
+            options={"plugins": ["clear_button"]},
+        )
+
+    # table time filter
+    @render.ui
+    def table_time_filter():
+        return ui.input_selectize(
+            "filter_time",
+            "table time filter:",
+            df_tips()["time"].unique().tolist(),
+            multiple=True,
+            remove_button=True,
+            options={"plugins": ["clear_button"]},
+        )
+
+    # placeholder for joined dataframe
+    @reactive.calc
+    def df_tips():
+        # fmt: off
+        data = {
+            'total_bill': [
+                16.99, 10.34, 21.01, 23.68, 24.59,
+                25.29, 8.77, 26.88, 15.04, 14.78
+            ],
+            'tip': [
+                1.01, 1.66, 3.50, 3.31, 3.61,
+                4.71, 2.00, 3.12, 3.52, 3.00
+            ],
+            'sex': [
+                'Female', 'Male', 'Male', 'Male', 'Female',
+                'Male', 'Male', 'Male', 'Male', 'Female'
+            ],
+            'smoker': [
+                'No', 'No', 'No', 'No', 'Yes',
+                'No', 'No', 'Yes', 'No', 'Yes'
+            ],
+            'day': [
+                'Sun', 'Fri', 'Sun', 'Thu', 'Sun',
+                'Sun', 'Sat', 'Sat', 'Sat', 'Sat'
+            ],
+            'time': [
+                'Dinner', 'Dinner', 'Lunch', 'Dinner', 'Lunch',
+                'Dinner', 'Lunch', 'Dinner', 'Lunch', 'Dinner'
+            ],
+            'size': [2, 3, 3, 2, 4, 4, 2, 4, 2, 2]
+        }
+        # fmt: on
+
+        df = pd.DataFrame(data)
+        return df
+
+
+app = App(app_ui, server)
+
+
+## file: requirements.txt
+pandas
+```
+
+## Problem to solve
+
+- Wanted users to explore data
+  - but not have them make a selection that returned an empty dataframe
+
+## Got to learn from the best
+
+![](img/joe-cheng-shiny.jpg)
+
+# Tip 1: Keep Variable Types Consistent
+
+## Example {.smaller}
+
+::: {.columns}
+:::::: {.column width=45%}
+Goals:
+
+- Each filter will operate on the data to get the observations that match
+- Get the intersection of all filtered values
+- Use the dataframe index as the identifier
+::::::
+
+:::::: {.column}
+Implementation steps:
+
+1. Get the dataframe
+2. Get the index of the dataframe
+3. Convert the index to a set (for intersection)
+4. Perform the set intersection
+5. Return a list of the values
+::::::
+
+:::
+
+
+```{.python code-line-numbers="3,4,7,10,11"}
+@reactive.calc
+def filter_idx():
+    df = df_tips() # <<
+    idx = set(df.index) # <<
+    if input.filter_day():
+        current_idx = df.loc[df["day"].isin(input.filter_day())].index
+        idx = idx.intersection(set(current_idx)) # <<
+    if input.filter_time():
+        current_idx = df.loc[df["time"].isin(input.filter_time())].index
+        idx = idx.intersection(set(current_idx)) # <<
+    return list(idx) # list because .loc[] would return TypeError# <<
+```
+
+## Code Improvement {.smaller}
+
+Before:
+```{.python code-line-numbers="3,4,7,10,11"}
+@reactive.calc
+def filter_idx():
+    df = df_tips() # <<
+    idx = set(df.index) # <<
+    if input.filter_day():
+        current_idx = df.loc[df["day"].isin(input.filter_day())].index
+        idx = idx.intersection(set(current_idx)) # <<
+    if input.filter_time():
+        current_idx = df.loc[df["time"].isin(input.filter_time())].index
+        idx = idx.intersection(set(current_idx)) # <<
+    return list(idx) # list because .loc[] would return TypeError# <<
+```
+After:
+```{.python code-line-numbers="3,4,7,10,11"}
+@reactive.calc
+def filter_idx():
+    df = df_tips() # <<
+    idx = df.index # <<
+    if input.filter_day():
+        current_idx = df.loc[df["day"].isin(input.filter_day())].index
+        idx = idx.intersection(current_idx) # <<
+    if input.filter_time():
+        current_idx = df.loc[df["time"].isin(input.filter_time())].index
+        idx = idx.intersection(current_idx) # <<
+    return idx # <<
+```
+
+## What I Learned
+
+- Do not reuse the same variable names
+- Especially if you are going to be changing the variable’s type
+  throughout the code
+- There's probably a better way
+- Writing functions isn't just about data type of input and data type of output
+- The implementation matters for maintainability
+
+# Tip 2: Use Python Type Hints
+
+## Intensional
+
+- Want to be intensional with the variables you are creating and using
+
+```python
+from __future__ import annotations
+
+import pandas as pd
+
+idx_int: pd.Index[Any] = pd.Index([1, 2, 3]) # reportRedeclaration here
+idx_int: pd.Index[int] = pd.Index([1, 2, 3])
+```
+
+## Ignore outright
+
+- Sometimes you need to ignore something
+
+```python
+from pandas.api.types import is_numeric_dtype, is_string_dtype # pyright: ignore [reportUnknownVariableType]
+```
+
+## Cast
+
+- Other times, you just need to cast it (be careful that this can be hard to debug)
+
+```python
+from typing import Any, cast
+
+def return_index(df: pd.DataFrame) -> "pd.Index[Any]":
+    return cast("pd.Index[Any]", df.index)
+```
+
+
+## What I Learned
+
+- Type hints can serve as documentation
+- Improve code readability
+- Enable tools to catch type-related errors
+- Helps keep data structures and assumptions in your head while working
+<br>
+- I'm still learning a lot in this area
+
+
+# Tip 3: Know When You Should Use Shiny Modules
+
+## 3a: Tracking List(s) of Component Values
+
+Code smells:
+
+:::{.incremental}
+- Calling the same component creating function multiple times.
+- Creating a list of `id` values and iterating over and calling a function that makes a component.
+- Creating at least 2 lists that track the `id` and some other input for the component.
+    - For example a separate list for the `id` or `label`, but can also include things like a column name of a dataframe.
+- Iterating across lists(s) to ensure inputs are captured together
+  - Especially if you find your self using the `zip()` function
+:::
+
+More on the Shiny for Python Module documentation: <https://shiny.posit.co/py/docs/modules.html>
+
+## Example
+
+All 3 bits of information needed to be tracked together.
+
+```python
+filters = ["filter_size", "filter_id", "filter_total_bill"]
+cols = ["size", "id", "total_bill"]
+col_types = ["cat", "cat", "sliders"]
+
+for fltr, col, col_type in zip(filters, cols, col_types):
+    ...
+```
+
+- I should only need to pass in 1 bit of information (column name)
+- The rest can be calculated
+
+::: {.notes}
+filters: get the user inputs from the ui.
+
+cols: tied to the filters variable, and used to extract the corresponding column from the data.
+
+col_type: determine how the data needed to be filtered. For example, selectize components always return values as a list of strings (List[str]), and needed to be converted to a numeric type to filter the data.
+:::
+
+## 3b: Complex and Interweaved Behaviors
+
+- Dynamically creating component ids
+- Complex/complicated operations needing multiple other `@reactive` intermediate steps
+- Coupling: changes in the codebase in many parts of the application in both the `server()` and `ui`
+
+## Coupling Example
+
+- Adding a new feature requires 3 distinct changes to the code base, every time.
+
+```python
+# in the server function of the application
+current_ids = df.loc[df[col].isin(filter_value)].index
+
+# in one of the helper functions
+if is_string_dtype(col):
+    return "cat_str"
+
+# in the server and/or ui of the application
+ui.output_ui("table_size_filter"),
+
+@render.ui
+def table_id_filter():
+    return ui.input_selectize(
+        "filter_id",
+        "id filter:",
+        sorted(df_tips()["id"].unique().tolist()),
+        multiple=True,
+        remove_button=True,
+        options={"plugins": ["clear_button"]},
+    )
+```
+
+
+# Tip 4: Make Your Shiny App Testable
+
+## Testing
+
+- Have the computer make the checks you may be doing visually
+- Hve the checks done in code
+
+## Pytest Example
+
+```{.python code-line-numbers="15,16"}
+import pandas as pd
+
+idx1 = pd.Index([1, 2, 3, 4, 5])
+idx2 = pd.Index([2, 3, 4, 5, 6])
+idx3 = pd.Index([3, 4, 5, 6, 7])
+default = pd.Index([1, 2, 3, 4, 5, 6, 7])
+
+def test_index_intersection_all():
+    to_intersect = [idx1, idx2, idx3]
+    expected = pd.Index([3, 4, 5])
+    calculated = index_intersection_all(
+        to_intersect,
+        default=default,
+    )
+    assert (calculated == expected).all()
+    assert calculated.equals(expected)
+```
+
+## Playwright Example
+
+```{.python}
+from shiny.playwright import controller
+from shiny.run import ShinyAppProc
+from playwright.sync_api import Page
+from shiny.pytest import create_app_fixture
+
+app = create_app_fixture("app.py")
+
+
+def test_basic_app(page: Page, app: ShinyAppProc):
+    page.goto(app.url)
+
+    selectize_day = controller.InputSelectize(page, "adaptive-filter_day")
+    selectize_day.set("Fri")
+    selectize_day.expect_selected(["Fri"])
+
+    selectize_time = controller.InputSelectize(page, "adaptive-filter_time")
+    selectize_time.expect_choices(["Dinner"])
+```
+
+## What I Learned
+
+- Testing is always great (nothing new here)
+- Playwright is the more modern way to test web apps
+  - Compared to Selenium...
+- Shiny makes playwright easier to code against
+
+# Tip 5: Think of the Developer Experience
+
+## New problem
+
+- How and what do we expose from our module to the user to make customizations?
+
+## Example: Initial attempt with current codebase
+
+```python
+from functools import partial
+
+override = {
+    # using a partial
+    "time": partial(shiny_adaptive_filter.FilterCatStringCheckbox, label="Time of Day"),
+
+    # using a lambda
+    "size": lambda data, id, colname, session: \
+      shiny_adaptive_filter.FilterCatNumericCheckbox(
+        data,
+        id,
+        colname,
+        label="Time of Day",
+        session=session),
+}
+```
+
+## Example: Final version (for now)
+
+```python
+override = {
+    "total_bill": None,
+    "day": "DAY!",
+    "time": shiny_adaptive_filter.FilterCatStringSelect(),
+    "size": shiny_adaptive_filter.FilterCatNumericCheckbox(label="Party Size"),
+}
+```
+
+## Example: The cost
+
+
+```python
+class BaseFilter(ABC, Generic[T]):
+    def __init__(self, *, label: str | None = None):
+        ...
+
+    def finish_init(
+        self,
+        data: Callable[[], pd.DataFrame] | pd.DataFrame,
+        id: str,
+        column_name: str,
+        *,
+        session: Session | None = None,
+    ):
+        ...
+
+        return self
+```
+
+## What I learned
+
+Balance tradeoffs between:
+
+- convenience for the user
+- the future developer who will extend the library
+- yourself in the future
+- the object oriented dogma
+
+Sometimes it might be okay to sacrifice the dogma to make everything else convenient.
+But there's always a better way, so keep learning...
+
+
+## Putting it all together
+
+```{shinylive-python}
+#| standalone: true
+#| components: [editor, viewer]
+#| viewerHeight: 550
+
+import pandas as pd
+from shiny import App, render, reactive, ui
+
+import shiny_adaptive_filter as saf
+
+app_ui = ui.page_sidebar(
+    ui.sidebar(
+        ui.input_action_button("reset", "Reset filters"), #<<
+        saf.filter_ui("adaptive"),
+    ),
+    ui.output_data_frame("render_df"),
+)
+
+def server(input, output, session):
+    @reactive.calc
+    def data_filtered():
+        df = tips.loc[filter_idx()]
+        return df
+
+    @render.data_frame
+    def render_df():
+        return render.DataGrid(data_filtered())
+
+    @reactive.effect #<<
+    @reactive.event(input.reset) #<<
+    def _(): #<<
+        adaptive_reset_all() #<<
+
+    override = {
+        "total_bill": saf.FilterNumNumericRange(),
+        "tip": saf.FilterNumNumericRange(),
+    }
+
+    filter_return = saf.filter_server(
+        "adaptive",
+        df=tips,
+        override=override,
+    )
+    filter_idx = filter_return["filter_idx"]
+    adaptive_reset_all = filter_return["reset_all"] #<<
+
+data = {
+    'total_bill': [16.99, 10.34, 21.01, 23.68, 24.59],
+    'tip': [1.01, 1.66, 3.50, 3.31, 3.61],
+    'sex': ['Female', 'Male', 'Male', 'Male', 'Female'],
+    'smoker': ['No', 'No', 'No', 'No', 'Yes'],
+    'day': ['Sun', 'Sun', 'Sun', 'Fri', 'Sun'],
+    'time': ['Lunch', 'Dinner', 'Dinner', 'Dinner', 'Dinner'],
+    'size': [2, 3, 3, 2, 4]
+}
+
+tips = pd.DataFrame(data)
+
+app = App(app_ui, server)
+
+
+## file: requirements.txt
+shiny_adaptive_filter>=0.0.1.9004
+```
+
+## Thank You!
+
+- Slides/Repo: <https://github.com/chendaniely/pydata-global-2024-pyshiny_tips>
+- Blog: <https://posit.co/blog/tips-for-implementing-custom-features-in-shiny/>
+
+<br>
+
+- Shiny for Python: <https://shiny.posit.co/py/>
+- Try it in the browser: <https://shinylive.io/py/>

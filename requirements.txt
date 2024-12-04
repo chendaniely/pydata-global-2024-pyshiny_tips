@@ -1,0 +1,5 @@
+ipykernel
+shiny
+shinylive
+shiny_adaptive_filter
+pandas
